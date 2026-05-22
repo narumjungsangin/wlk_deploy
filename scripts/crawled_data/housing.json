@@ -1,0 +1,41 @@
+{
+  "board_name": "Housing",
+  "board_url": "https://wlafayettekorea.org/housing/",
+  "crawled_at": "20260521_154418",
+  "total_posts": 3,
+  "posts": [
+    {
+      "uid": 64,
+      "url": "https://wlafayettekorea.org/housing/?mod=document&uid=64",
+      "title": "샌츄리 아파트 선착순 프로모션",
+      "author": "",
+      "date": "2026-04-23 06:55",
+      "category": "전체렌트서브리스집매매기타",
+      "content": "센츄리 아파트 2b2b 또는 Studio 1년 계약시 선착순으로 $1,250 gift card 증정 합니다. (소진시 종료되고 6/15일 까지 입주)",
+      "raw_html": "<div class=\"kboard-content\" itemprop=\"description\">\n<div class=\"content-view\">\r\n\t\t\t\t\t\t\t\t\t\t센츄리 아파트 2b2b 또는 Studio 1년 계약시 선착순으로 $1,250 gift card 증정 합니다. (소진시 종료되고 6/15일 까지 입주)\t\t\t\t</div>\n</div>",
+      "comments": []
+    },
+    {
+      "uid": 60,
+      "url": "https://wlafayettekorea.org/housing/?mod=document&uid=60",
+      "title": "웨스트라피엣 부동산 문의",
+      "author": "",
+      "date": "2026-04-06 15:28",
+      "category": "전체렌트서브리스집매매기타",
+      "content": "",
+      "raw_html": "<div class=\"kboard-content\" itemprop=\"description\">\n<div class=\"content-view\">\n</div>\n</div>",
+      "comments": []
+    },
+    {
+      "uid": 57,
+      "url": "https://wlafayettekorea.org/housing/?mod=document&uid=57",
+      "title": "Sk 근처 웨스트라피엣 하우스 쉐어 렌트",
+      "author": "",
+      "date": "2026-03-30 08:57",
+      "category": "전체렌트서브리스집매매기타",
+      "content": "자세한 사항 /사진/ 쇼잉 문의는 전화/문자/ email\n702-238-3226\nEmoon@truebloodre.com",
+      "raw_html": "<div class=\"kboard-content\" itemprop=\"description\">\n<div class=\"content-view\">\n<ol>\n<li>자세한 사항 /사진/ 쇼잉 문의는 전화/문자/ email</li>\n<li>702-238-3226</li>\n<li>Emoon@truebloodre.com<img alt=\"\" decoding=\"async\" src=\"https://wlafayettekorea.org/wp-content/uploads/kboard_attached/8/202603/69ca723b0d1484199517.jpeg\"/></li>\n</ol> </div>\n</div>",
+      "comments": []
+    }
+  ]
+}

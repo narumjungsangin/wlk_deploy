@@ -1,0 +1,138 @@
+import NextAuth from 'next-auth';
+import Credentials from 'next-auth/providers/credentials';
+import Google from 'next-auth/providers/google';
+import bcrypt from 'bcryptjs';
+import { prisma } from '@/lib/prisma';
+
+// 관리자 이메일 목록
+const ADMIN_EMAILS = ['joonst26@gmail.com', 'purepsy@gmail.com'];
+
+const KakaoProvider = {
+  id: 'kakao',
+  name: '카카오',
+  type: 'oauth' as const,
+  authorization: {
+    url: 'https://kauth.kakao.com/oauth/authorize',
+    params: { scope: 'profile_nickname profile_image account_email' },
+  },
+  token: 'https://kauth.kakao.com/oauth/token',
+  userinfo: 'https://kapi.kakao.com/v2/user/me',
+  clientId: process.env.KAKAO_CLIENT_ID!,
+  clientSecret: process.env.KAKAO_CLIENT_SECRET!,
+  profile(profile: {
+    id: number;
+    kakao_account?: {
+      email?: string;
+      profile?: { nickname?: string; profile_image_url?: string };
+    };
+  }) {
+    return {
+      id: String(profile.id),
+      name: profile.kakao_account?.profile?.nickname ?? '카카오 사용자',
+      email: profile.kakao_account?.email ?? `kakao_${profile.id}@kakao.local`,
+      image: profile.kakao_account?.profile?.profile_image_url ?? null,
+    };
+  },
+};
+
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  secret: process.env.AUTH_SECRET ?? 'fallback-secret-for-development-only',
+  providers: [
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
+    KakaoProvider,
+    Credentials({
+      name: 'credentials',
+      credentials: {
+        email: { label: '이메일', type: 'email' },
+        password: { label: '비밀번호', type: 'password' },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) return null;
+
+        const user = await prisma.user.findUnique({
+          where: { email: credentials.email as string },
+        });
+
+        if (!user) return null;
+
+        const isValid = await bcrypt.compare(
+          credentials.password as string,
+          user.password
+        );
+
+        if (!isValid) return null;
+
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.displayName,
+          role: user.role,
+        };
+      },
+    }),
+  ],
+  session: { strategy: 'jwt' },
+  pages: {
+    signIn: '/login',
+  },
+  callbacks: {
+    async signIn({ user, account }) {
+      if (account?.provider === 'google' || account?.provider === 'kakao') {
+        if (!user.email) return false;
+        const isAdminEmail = ADMIN_EMAILS.includes(user.email);
+        const existing = await prisma.user.findUnique({
+          where: { email: user.email },
+        });
+        if (!existing) {
+          await prisma.user.create({
+            data: {
+              email: user.email,
+              displayName: user.name ?? user.email.split('@')[0],
+              password: '',
+              firstName: user.name?.split(' ')[0] ?? '',
+              lastName: user.name?.split(' ').slice(1).join(' ') ?? '',
+              role: isAdminEmail ? 'ADMIN' : 'USER',
+            },
+          });
+        } else if (isAdminEmail && existing.role !== 'ADMIN') {
+          // 관리자 이메일이지만 ADMIN이 아닌 경우 업데이트
+          await prisma.user.update({
+            where: { email: user.email },
+            data: { role: 'ADMIN' },
+          });
+        }
+      }
+      return true;
+    },
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.role = (user as { role?: string }).role ?? 'USER';
+      }
+      if (token.email && !token.id) {
+        const dbUser = await prisma.user.findUnique({
+          where: { email: token.email },
+        });
+        if (dbUser) {
+          token.id = dbUser.id;
+          token.role = dbUser.role;
+        }
+      }
+      // 어드민 이메일 체크하여 role 강제 업데이트
+      if (token.email && ADMIN_EMAILS.includes(token.email as string)) {
+        token.role = 'ADMIN';
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token) {
+        session.user.id = token.id as string;
+        (session.user as { role?: string }).role = token.role as string;
+      }
+      return session;
+    },
+  },
+});
