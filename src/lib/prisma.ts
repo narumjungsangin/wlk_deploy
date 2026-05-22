@@ -1,18 +1,16 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@/generated/prisma';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
-import { createPool } from 'mariadb';
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
 function createPrismaClient() {
-  let connectionString = process.env.DATABASE_URL!;
+  let connectionString = process.env.DATABASE_URL || '';
   if (connectionString.startsWith('mysql://')) {
     connectionString = connectionString.replace('mysql://', 'mariadb://');
   }
-  const pool = createPool(connectionString);
-  const adapter = new PrismaMariaDb(pool);
+  const adapter = new PrismaMariaDb(connectionString || 'mariadb://localhost:3306/placeholder_db');
 
   return new PrismaClient({
     adapter,

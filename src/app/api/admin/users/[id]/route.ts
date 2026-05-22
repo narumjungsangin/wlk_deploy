@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { Role } from '@/generated/prisma';
 import { checkAdmin, createAdminResponse, isAdminEmail } from '@/lib/admin';
 
 interface Params {
@@ -38,9 +39,9 @@ export async function PUT(req: NextRequest, { params }: Params) {
       );
     }
 
-    const updateData: { role?: string; blocked?: boolean } = {};
+    const updateData: { role?: Role; blocked?: boolean } = {};
     if (role !== undefined) {
-      updateData.role = role;
+      updateData.role = role as Role;
     }
     if (blocked !== undefined) {
       // Prisma 스키마에 blocked 필드가 없으므로 주석으로 표시

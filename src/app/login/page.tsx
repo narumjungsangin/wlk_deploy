@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import LogoImage from '@/components/LogoImage';
 import SocialLoginButtons from '@/components/SocialLoginButtons';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const registered = searchParams.get('registered');
@@ -112,5 +112,19 @@ export default function LoginPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <main className="flex items-center justify-center min-h-[calc(100vh-8rem)] px-4">
+        <div className="w-full max-w-sm text-center">
+          <p className="text-gray-500">로딩 중...</p>
+        </div>
+      </main>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }
