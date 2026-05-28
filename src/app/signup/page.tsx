@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import LogoImage from '@/components/LogoImage';
 import SocialLoginButtons from '@/components/SocialLoginButtons';
+import { Mail, CheckCircle } from 'lucide-react';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -24,6 +25,8 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [checkingUsername, setCheckingUsername] = useState(false);
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
+  const [registered, setRegistered] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -117,12 +120,34 @@ export default function SignupPage() {
       if (!res.ok) {
         throw new Error(data.error ?? '회원가입에 실패했습니다.');
       }
-      router.push('/login?registered=1');
+      setRegistered(true);
+      setRegisteredEmail(form.email);
     } catch (err) {
       setError(err instanceof Error ? err.message : '오류가 발생했습니다.');
     } finally {
       setLoading(false);
     }
+  }
+
+  // 회원가입 성공 화면
+  if (registered) {
+    return (
+      <main className="flex items-center justify-center min-h-[calc(100vh-8rem)] px-4 py-8">
+        <div className="w-full max-w-sm text-center">
+          <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+          <h1 className="text-xl font-bold text-gray-900 mb-2">회원가입 완료</h1>
+          <p className="text-gray-600 mb-6 text-sm">
+            회원가입이 완료되었습니다.<br />로그인하여 서비스를 이용해주세요.
+          </p>
+          <Link
+            href="/login"
+            className="inline-block w-full py-2.5 bg-blue-600 text-white font-medium text-sm rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            로그인 페이지로
+          </Link>
+        </div>
+      </main>
+    );
   }
 
   return (
@@ -210,6 +235,7 @@ export default function SignupPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                <Mail className="w-4 h-4 inline mr-1" />
                 이메일 <span className="text-red-500">*</span>
               </label>
               <input

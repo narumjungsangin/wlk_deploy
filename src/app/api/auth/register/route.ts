@@ -49,11 +49,16 @@ export async function POST(req: NextRequest) {
         displayName: displayName.trim(),
         firstName: firstName.trim(),
         lastName: lastName.trim(),
+        emailVerifyToken: null,
+        emailVerified: true,
       },
       select: { id: true, email: true, displayName: true, firstName: true, lastName: true },
     });
 
-    return NextResponse.json(user, { status: 201 });
+    return NextResponse.json({
+      ...user,
+      message: '회원가입이 완료되었습니다.',
+    }, { status: 201 });
   } catch (err) {
     console.error('[register]', err);
     return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 });

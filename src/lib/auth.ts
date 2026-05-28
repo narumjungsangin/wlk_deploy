@@ -37,6 +37,7 @@ const KakaoProvider = {
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   secret: process.env.AUTH_SECRET ?? 'fallback-secret-for-development-only',
+  trustHost: true,
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,

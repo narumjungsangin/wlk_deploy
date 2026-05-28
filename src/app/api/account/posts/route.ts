@@ -1,0 +1,62 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
+
+// GET: 내 게시물 목록
+export async function GET(req: NextRequest) {
+  try {
+    const session = await auth();
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: '인증이 필요합니다.' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get('page') || '1', 10);
+    const limit = parseInt(searchParams.get('limit') || '10', 10);
+    const skip = (page - 1) * limit;
+
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: '사용자를 찾을 수 없습니다.' }, { status: 404 });
+    }
+
+    const [posts, total] = await Promise.all([
+      prisma.post.findMany({
+        where: { authorId: user.id },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+        include: {
+          _count: { select: { comments: true } },
+        },
+      }),
+      prisma.post.count({ where: { authorId: user.id } }),
+    ]);
+
+    const mappedPosts = posts.map((p) => ({
+      id: p.id,
+      title: p.title,
+      category: p.category,
+      subCategory: p.subCategory,
+      viewCount: p.viewCount,
+      commentCount: p._count.comments,
+      createdAt: p.createdAt.toISOString(),
+    }));
+
+    return NextResponse.json({
+      posts: mappedPosts,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
+  } catch (err) {
+    console.error('[account/posts GET] ERROR:', err);
+    return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 });
+  }
+}

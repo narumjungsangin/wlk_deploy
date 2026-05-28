@@ -16,7 +16,8 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Generate Prisma Client
+# Generate Prisma Client (DATABASE_URL dummy for build-time only)
+ENV DATABASE_URL="mariadb://user:pass@localhost:3306/db"
 RUN npx prisma generate
 
 # Disable telemetry during build
@@ -33,6 +34,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
+RUN apk add --no-cache mariadb-client
 
 COPY --from=builder /app/public ./public
 
@@ -43,6 +45,11 @@ RUN chown nextjs:nodejs .next
 # Automatically leverage output traces to reduce image size
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nextjs:nodejs /app/src/generated ./src/generated
+
+COPY entrypoint.sh ./entrypoint.sh
+RUN chmod +x ./entrypoint.sh
 
 USER nextjs
 
@@ -53,4 +60,4 @@ ENV PORT=3000
 # Hostname must be set to '0.0.0.0' to allow connection outside container
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+CMD ["./entrypoint.sh"]

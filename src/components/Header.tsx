@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import LogoImage from '@/components/LogoImage';
-import { Menu, X, ChevronDown, Settings, LogOut, User } from 'lucide-react';
+import { Menu, X, ChevronDown, Settings, LogOut, User, UserCog } from 'lucide-react';
 import type { NavItem } from '@/types';
 import { CATEGORIES } from '@/lib/categories';
 
@@ -80,10 +80,13 @@ export default function Header() {
                   관리자
                 </Link>
               )}
-              <div className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700">
-                <User className="w-4 h-4" />
+              <Link
+                href="/account"
+                className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              >
+                <UserCog className="w-4 h-4" />
                 <span className="max-w-[120px] truncate">{session?.user?.name || session?.user?.email}</span>
-              </div>
+              </Link>
               <button
                 onClick={() => signOut({ callbackUrl: '/' })}
                 className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
@@ -159,10 +162,14 @@ export default function Header() {
           <div className="pt-2 border-t flex flex-col gap-2">
             {isAuthenticated ? (
               <>
-                <div className="px-3 py-2 text-sm text-gray-700 flex items-center gap-2">
-                  <User className="w-4 h-4" />
+                <Link
+                  href="/account"
+                  className="px-3 py-2 text-sm text-gray-700 flex items-center gap-2 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <UserCog className="w-4 h-4" />
                   {session?.user?.name || session?.user?.email}
-                </div>
+                </Link>
                 {isAdmin && (
                   <Link
                     href="/admin"

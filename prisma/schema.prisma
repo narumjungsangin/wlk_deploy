@@ -2,7 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
   output   = "../src/generated/prisma"
 }
 
@@ -11,18 +11,20 @@ datasource db {
 }
 
 model User {
-  id               String    @id @default(cuid())
-  email            String    @unique
-  password         String
-  displayName      String
-  firstName        String
-  lastName         String
-  role             Role      @default(USER)
-  resetToken       String?   @unique
-  resetTokenExpiry DateTime?
-  createdAt        DateTime  @default(now())
-  posts            Post[]
-  comments         Comment[]
+  id                String    @id @default(cuid())
+  email             String    @unique
+  password          String
+  displayName       String
+  firstName         String
+  lastName          String
+  role              Role      @default(USER)
+  emailVerified     Boolean   @default(false)
+  emailVerifyToken  String?   @unique
+  resetToken        String?   @unique
+  resetTokenExpiry  DateTime?
+  createdAt         DateTime  @default(now())
+  posts             Post[]
+  comments          Comment[]
 }
 
 model Post {

@@ -2,8 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { getCategoryBySlug } from '@/lib/categories';
-import { SEED_POSTS } from '@/lib/seed-data';
-import type { CategorySlug } from '@/types';
+import { prisma } from '@/lib/prisma';
 
 interface Props {
   params: Promise<{ category: string }>;
@@ -16,6 +15,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!cat) return {};
   return { title: cat.label, description: cat.description };
 }
+
+export const dynamic = 'force-dynamic';
 
 export default async function CategoryPage({ params, searchParams }: Props) {
   const { category } = await params;
@@ -30,17 +31,39 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   const currentPage = parseInt(page ?? '1', 10);
   const pageSize = 15;
 
-  let posts = SEED_POSTS.filter((p) => p.category === (category as CategorySlug));
-  if (sub) {
-    posts = posts.filter((p) => p.subCategory === sub);
-  }
-  if (tag) {
-    posts = posts.filter((p) => p.tag === tag);
-  }
+  const where = {
+    category,
+    ...(sub ? { subCategory: sub } : {}),
+    ...(tag ? { tag } : {}),
+  };
 
-  const total = posts.length;
+  const [total, dbPosts] = await Promise.all([
+    prisma.post.count({ where }),
+    prisma.post.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      skip: (currentPage - 1) * pageSize,
+      take: pageSize,
+      include: {
+        author: { select: { id: true, displayName: true } },
+        _count: { select: { comments: true } },
+      },
+    }),
+  ]);
+
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
-  const paginated = posts.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const paginated = dbPosts.map((p) => ({
+    id: p.id,
+    category: p.category,
+    subCategory: p.subCategory ?? undefined,
+    tag: p.tag ?? undefined,
+    title: p.title,
+    authorId: p.authorId,
+    author: p.author,
+    viewCount: p.viewCount,
+    commentCount: p._count.comments,
+    createdAt: p.createdAt.toISOString(),
+  }));
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-8">
@@ -172,7 +195,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
             </thead>
             <tbody className="divide-y">
               {paginated.map((post) => (
-                <tr key={post.id} className="hover:bg-gray-50 transition-colors">
+                <tr key={post.id} className="hover:bg-gray-50 transition-colors cursor-pointer">
                   <td className="py-3 px-4">
                     <Link
                       href={`/posts/${post.id}`}
@@ -187,16 +210,22 @@ export default async function CategoryPage({ params, searchParams }: Props) {
                     </Link>
                   </td>
                   <td className="py-3 px-4 text-center text-gray-500 hidden sm:table-cell">
-                    {post.author?.displayName ?? '-'}
+                    <Link href={`/posts/${post.id}`} className="block">
+                      {post.author?.displayName ?? '-'}
+                    </Link>
                   </td>
                   <td className="py-3 px-4 text-center text-gray-400">
-                    {new Date(post.createdAt).toLocaleDateString('ko-KR', {
-                      month: '2-digit',
-                      day: '2-digit',
-                    })}
+                    <Link href={`/posts/${post.id}`} className="block">
+                      {new Date(post.createdAt).toLocaleDateString('ko-KR', {
+                        month: '2-digit',
+                        day: '2-digit',
+                      })}
+                    </Link>
                   </td>
                   <td className="py-3 px-4 text-center text-gray-400 hidden md:table-cell">
-                    {post.viewCount}
+                    <Link href={`/posts/${post.id}`} className="block">
+                      {post.viewCount}
+                    </Link>
                   </td>
                 </tr>
               ))}

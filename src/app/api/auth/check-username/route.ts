@@ -15,9 +15,7 @@ export async function GET(req: NextRequest) {
 
     const existing = await prisma.user.findFirst({
       where: {
-        displayName: {
-          equals: username.trim(),
-        },
+        displayName: username.trim(),
       },
     });
 
