@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
 
       uploadedFiles.push({
         name: originalName,
-        url: `/uploads/${uniqueFilename}`,
+        url: `/api/uploads/${uniqueFilename}`,
         size: file.size,
         type: file.type,
       });

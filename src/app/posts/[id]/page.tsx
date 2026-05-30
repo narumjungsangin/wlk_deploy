@@ -47,6 +47,7 @@ export default async function PostPage({ params }: Props) {
     categoryLabel: cat?.label ?? post.category,
     title: post.title,
     content: post.content,
+    attachments: post.attachments ? JSON.parse(post.attachments) : [],
     authorId: post.authorId,
     author: post.author,
     viewCount: post.viewCount,

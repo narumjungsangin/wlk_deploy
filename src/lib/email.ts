@@ -1,24 +1,18 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.SMTP_PORT || '587', 10),
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
-const FROM_EMAIL = process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@example.com';
+const FROM_EMAIL = process.env.RESEND_FROM || 'noreply@wlkorea.com';
 const APP_URL = process.env.NEXTAUTH_URL || 'http://localhost:3000';
 
 // 이메일 인증 메일 발송
 export async function sendVerificationEmail(email: string, token: string) {
   const verificationUrl = `${APP_URL}/verify-email?token=${token}`;
 
-  await transporter.sendMail({
-    from: `"West Lafayette Korea" <${FROM_EMAIL}>`,
+  await getResend().emails.send({
+    from: `West Lafayette Korea <${FROM_EMAIL}>`,
     to: email,
     subject: '[West Lafayette Korea] 이메일 인증을 완료해주세요',
     html: `
@@ -52,8 +46,8 @@ export async function sendVerificationEmail(email: string, token: string) {
 export async function sendPasswordResetEmail(email: string, token: string) {
   const resetUrl = `${APP_URL}/reset-password?token=${token}`;
 
-  await transporter.sendMail({
-    from: `"West Lafayette Korea" <${FROM_EMAIL}>`,
+  await getResend().emails.send({
+    from: `West Lafayette Korea <${FROM_EMAIL}>`,
     to: email,
     subject: '[West Lafayette Korea] 비밀번호 재설정',
     html: `

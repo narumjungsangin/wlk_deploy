@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { category, subCategory, tag, title, content } = body;
+    const { category, subCategory, tag, title, content, attachments } = body;
 
     if (!category || !title?.trim() || !content?.trim()) {
       return NextResponse.json({ error: '카테고리, 제목, 내용은 필수입니다.' }, { status: 400 });
@@ -84,6 +84,7 @@ export async function POST(req: NextRequest) {
         tag: tag ?? null,
         title: title.trim(),
         content: content.trim(),
+        attachments: attachments && attachments.length > 0 ? JSON.stringify(attachments) : null,
         authorId: session.user.id,
       },
       include: {

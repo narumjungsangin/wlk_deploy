@@ -33,6 +33,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
       subCategory: post.subCategory,
       title: post.title,
       content: post.content,
+      attachments: post.attachments ? JSON.parse(post.attachments) : [],
       authorId: post.authorId,
       author: post.author,
       viewCount: post.viewCount,
@@ -79,6 +80,9 @@ export async function PUT(req: NextRequest, { params }: Params) {
         ...(body.title ? { title: body.title.trim() } : {}),
         ...(body.content ? { content: body.content.trim() } : {}),
         ...(body.subCategory !== undefined ? { subCategory: body.subCategory } : {}),
+        ...(body.attachments !== undefined
+          ? { attachments: body.attachments.length > 0 ? JSON.stringify(body.attachments) : null }
+          : {}),
       },
     });
 

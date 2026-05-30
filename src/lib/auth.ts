@@ -4,8 +4,8 @@ import Google from 'next-auth/providers/google';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 
-// 관리자 이메일 목록
-const ADMIN_EMAILS = ['joonst26@gmail.com', 'purepsy@gmail.com'];
+// 관리자 이메일 목록 (환경변수로 설정, 쉼표로 구분)
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim()).filter(Boolean);
 
 const KakaoProvider = {
   id: 'kakao',

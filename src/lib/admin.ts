@@ -1,8 +1,9 @@
 import { auth } from '@/lib/auth';
 import { NextResponse } from 'next/server';
 
-// 관리자 이메일 목록
-export const ADMIN_EMAILS = ['joonst26@gmail.com', 'purepsy@gmail.com'];
+// 관리자 이메일 목록은 auth.ts의 환경변수를 공유함
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim()).filter(Boolean);
+export { ADMIN_EMAILS };
 
 export function isAdminEmail(email: string): boolean {
   return ADMIN_EMAILS.includes(email);

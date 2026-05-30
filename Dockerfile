@@ -18,11 +18,14 @@ COPY . .
 
 # Generate Prisma Client (DATABASE_URL dummy for build-time only)
 ENV DATABASE_URL="mariadb://user:pass@localhost:3306/db"
-RUN npx prisma generate
+ENV SMTP_USER="build@dummy.com"
+RUN npx prisma generate && ls -la src/generated/prisma
 
 # Disable telemetry during build
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Build Next.js app (prisma already generated above)
+RUN ls -la src/generated/prisma && cat src/generated/prisma/package.json | head -5
 RUN npm run build
 
 # Production image, copy all the files and run next
@@ -37,6 +40,9 @@ RUN adduser --system --uid 1001 nextjs
 RUN apk add --no-cache mariadb-client
 
 COPY --from=builder /app/public ./public
+
+# Create uploads directory and set ownership
+RUN mkdir -p public/uploads && chown -R nextjs:nodejs public/uploads
 
 # Set the correct permission for prerender cache
 RUN mkdir .next
