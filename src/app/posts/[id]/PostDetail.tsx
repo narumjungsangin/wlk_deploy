@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
+import DOMPurify from 'dompurify';
 import RichEditor from '@/components/RichEditor';
 
 interface Author {
@@ -265,7 +266,23 @@ export default function PostDetail({ post }: { post: PostData }) {
           ) : (
             <div
               className="prose prose-sm max-w-none text-gray-700"
-              dangerouslySetInnerHTML={{ __html: post.content ?? '' }}
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(post.content ?? '', {
+                  ALLOWED_TAGS: [
+                    'p', 'br', 'strong', 'b', 'em', 'i', 'u', 'strike', 'del',
+                    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                    'ul', 'ol', 'li',
+                    'blockquote', 'code', 'pre',
+                    'a', 'img', 'span',
+                    'table', 'thead', 'tbody', 'tr', 'th', 'td',
+                    'div', 'hr'
+                  ],
+                  ALLOWED_ATTR: [
+                    'href', 'target', 'rel', 'src', 'alt', 'title',
+                    'class', 'style', 'width', 'height'
+                  ],
+                })
+              }}
             />
           )}
         </div>

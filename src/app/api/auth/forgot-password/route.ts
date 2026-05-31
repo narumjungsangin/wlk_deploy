@@ -2,9 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { prisma } from '@/lib/prisma';
 import { sendPasswordResetEmail } from '@/lib/email';
+import { checkRateLimit, loginLimiter } from '@/lib/rate-limiter';
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limiting check (로그인과 동일한 제한 적용)
+    const rateLimitResult = await checkRateLimit(loginLimiter, req);
+    if (!rateLimitResult.allowed) {
+      return rateLimitResult.response!;
+    }
+
     const body = await req.json();
     const { email } = body;
 
