@@ -103,11 +103,26 @@ if (process.env.KAKAO_CLIENT_ID && process.env.KAKAO_CLIENT_SECRET) {
   providers.push(KakaoProvider);
 }
 
+// NEXTAUTH_URL 정리 함수
+const getAuthUrl = () => {
+  const nextAuthUrl = process.env.NEXTAUTH_URL;
+  if (!nextAuthUrl) {
+    // 개발 환경에서는 기본값 사용
+    return 'http://localhost:3000';
+  }
+  
+  // NEXTAUTH_URL="https://wlk-deploy-gyd3wpr50-junsus-projects-f2597ce7.vercel.app/" 형태 처리
+  const cleanUrl = nextAuthUrl.replace(/^NEXTAUTH_URL=/, '').replace(/\/$/, '');
+  return cleanUrl;
+};
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   secret: process.env.AUTH_SECRET ?? 'fallback-secret-for-development-only',
   trustHost: true,
   debug: true, // 디버깅 모드 활성화
   providers,
+  // 정리된 URL 사용
+  ...(getAuthUrl() && { url: getAuthUrl() }),
   session: { strategy: 'jwt' },
   pages: {
     signIn: '/login',
