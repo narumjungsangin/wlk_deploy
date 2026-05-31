@@ -59,7 +59,7 @@ export async function GET() {
     console.error('Database check error:', error);
     return NextResponse.json({
       success: false,
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Unknown error',
       database: 'connection_failed'
     }, { status: 500 });
   } finally {
