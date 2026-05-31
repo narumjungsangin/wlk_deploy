@@ -52,18 +52,30 @@ export default function RichEditor({ content, onChange, placeholder, minHeight =
 
   async function uploadAndInsert(file: File, _pos?: number) {
     if (uploading.current) return;
-    if (file.size > MAX_FILE_SIZE) return;
+    if (file.size > MAX_FILE_SIZE) {
+      alert(`파일 크기가 너무 큽니다. 최대 10MB까지 업로드 가능합니다.`);
+      return;
+    }
     uploading.current = true;
     try {
       const formData = new FormData();
       formData.append('files', file);
       const res = await fetch('/api/upload', { method: 'POST', body: formData });
-      if (!res.ok) return;
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        const msg = data.error ?? `업로드 실패 (HTTP ${res.status})`;
+        console.error('[RichEditor] 업로드 실패:', msg, res.status);
+        alert(msg);
+        return;
+      }
       const data = await res.json();
       const url: string = data.files[0]?.url;
       if (url && editor) {
         editor.chain().focus().setImage({ src: url, alt: file.name }).run();
       }
+    } catch (err) {
+      console.error('[RichEditor] 업로드 오류:', err);
+      alert('이미지 업로드 중 오류가 발생했습니다.');
     } finally {
       uploading.current = false;
     }

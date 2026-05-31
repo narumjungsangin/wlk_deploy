@@ -1,0 +1,24 @@
+데이터베이스 마이그레이션 실행 방법
+=====================================
+
+1. 터미널/명령 프롬프트를 열고 다음 명령어를 실행하세요:
+
+   mysql -u [사용자이름] -p [데이터베이스이름] < scripts/migration.sql
+
+2. 실제 사용 예시:
+   mysql -u root -p wlk_database < scripts/migration.sql
+   
+   또는
+   mysql -u your_username -p your_database_name < scripts/migration.sql
+
+3. 비밀번호를 입력하라는 프롬프트가 나오면 데이터베이스 비밀번호를 입력하세요.
+
+4. 마이그레이션이 완료되면 다음 관리자 계정으로 로그인할 수 있습니다:
+   이메일: admin@wlafayettekorea.org
+   비밀번호: admin123
+
+마이그레이션될 데이터: 총 21개 게시물, 5개 댓글
+
+주의사항:
+- 실행 전 데이터베이스 백업을 권장합니다
+- 이미지 파일은 마이그레이션되지 않고 텍스트만 처리됩니다
