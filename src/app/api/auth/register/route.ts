@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import { prisma } from '@/lib/prisma';
 import { checkRateLimit, registerLimiter } from '@/lib/rate-limiter';
+import { sendVerificationEmail } from '@/lib/email';
 
 export async function POST(req: NextRequest) {
   try {
@@ -48,6 +50,7 @@ export async function POST(req: NextRequest) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
+    const emailVerifyToken = crypto.randomBytes(32).toString('hex');
 
     const user = await prisma.user.create({
       data: {
@@ -56,15 +59,26 @@ export async function POST(req: NextRequest) {
         displayName: displayName.trim(),
         firstName: firstName.trim(),
         lastName: lastName.trim(),
-        emailVerifyToken: null,
-        emailVerified: true,
+        emailVerifyToken,
+        emailVerified: false,
       },
       select: { id: true, email: true, displayName: true, firstName: true, lastName: true },
     });
 
+    try {
+      await sendVerificationEmail(email, emailVerifyToken);
+    } catch (emailErr) {
+      console.error('[register] Email sending failed:', emailErr);
+      await prisma.user.delete({ where: { id: user.id } });
+      return NextResponse.json(
+        { error: '인증 이메일 발송에 실패했습니다. 잠시 후 다시 시도해주세요.' },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json({
       ...user,
-      message: '회원가입이 완료되었습니다.',
+      message: '인증 이메일이 발송되었습니다. 이메일을 확인하여 인증을 완료해주세요.',
     }, { status: 201 });
   } catch (err) {
     console.error('[register]', err);

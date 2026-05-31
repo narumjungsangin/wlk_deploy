@@ -134,10 +134,13 @@ export default function SignupPage() {
     return (
       <main className="flex items-center justify-center min-h-[calc(100vh-8rem)] px-4 py-8">
         <div className="w-full max-w-sm text-center">
-          <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <h1 className="text-xl font-bold text-gray-900 mb-2">회원가입 완료</h1>
+          <Mail className="w-16 h-16 text-blue-500 mx-auto mb-4" />
+          <h1 className="text-xl font-bold text-gray-900 mb-2">이메일을 확인해주세요</h1>
           <p className="text-gray-600 mb-6 text-sm">
-            회원가입이 완료되었습니다.<br />로그인하여 서비스를 이용해주세요.
+            <span className="font-medium text-gray-900">{registeredEmail}</span>로<br />
+            인증 메일을 발송했습니다.<br />
+            메일의 버튼을 클릭하여 인증을 완료하면<br />
+            로그인이 가능합니다.
           </p>
           <Link
             href="/login"

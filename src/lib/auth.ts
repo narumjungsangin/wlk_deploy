@@ -81,6 +81,11 @@ const providers: any[] = [
           return null;
         }
 
+        if (!user.emailVerified) {
+          console.log('Email not verified');
+          throw new Error('이메일 인증이 필요합니다. 가입 시 받은 인증 메일을 확인해주세요.');
+        }
+
         const result = {
           id: user.id,
           email: user.email,
