@@ -35,73 +35,79 @@ const KakaoProvider = {
   },
 };
 
+const providers = [
+  Google({
+    clientId: process.env.GOOGLE_CLIENT_ID!,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+  }),
+  Credentials({
+    name: 'credentials',
+    credentials: {
+      email: { label: '이메일', type: 'email' },
+      password: { label: '비밀번호', type: 'password' },
+    },
+    async authorize(credentials) {
+      console.log('Credentials authorize called:', { 
+        email: credentials?.email, 
+        hasPassword: !!credentials?.password 
+      });
+
+      if (!credentials?.email || !credentials?.password) {
+        console.log('Missing credentials');
+        return null;
+      }
+
+      try {
+        console.log('Looking for user:', credentials.email);
+        const user = await prisma.user.findUnique({
+          where: { email: credentials.email as string },
+        });
+
+        console.log('User found:', !!user);
+        if (!user) {
+          console.log('User not found in database');
+          return null;
+        }
+
+        console.log('Comparing password...');
+        const isValid = await bcrypt.compare(
+          credentials.password as string,
+          user.password
+        );
+
+        console.log('Password valid:', isValid);
+        if (!isValid) {
+          console.log('Password comparison failed');
+          return null;
+        }
+
+        const result = {
+          id: user.id,
+          email: user.email,
+          name: user.displayName,
+          role: user.role,
+        };
+        
+        console.log('Authentication successful for:', result.email);
+        return result;
+      } catch (error) {
+        console.error('Auth error:', error);
+        return null;
+      }
+    },
+  }),
+];
+
+// Kakao 제공업체는 환경 변수가 설정된 경우에만 추가
+if (process.env.KAKAO_CLIENT_ID && process.env.KAKAO_CLIENT_SECRET) {
+  providers.push(KakaoProvider);
+}
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   secret: process.env.AUTH_SECRET ?? 'fallback-secret-for-development-only',
   trustHost: true,
   debug: true, // 디버깅 모드 활성화
-  providers: [
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
-    KakaoProvider,
-    Credentials({
-      name: 'credentials',
-      credentials: {
-        email: { label: '이메일', type: 'email' },
-        password: { label: '비밀번호', type: 'password' },
-      },
-      async authorize(credentials) {
-        console.log('Credentials authorize called:', { 
-          email: credentials?.email, 
-          hasPassword: !!credentials?.password 
-        });
-
-        if (!credentials?.email || !credentials?.password) {
-          console.log('Missing credentials');
-          return null;
-        }
-
-        try {
-          console.log('Looking for user:', credentials.email);
-          const user = await prisma.user.findUnique({
-            where: { email: credentials.email as string },
-          });
-
-          console.log('User found:', !!user);
-          if (!user) {
-            console.log('User not found in database');
-            return null;
-          }
-
-          console.log('Comparing password...');
-          const isValid = await bcrypt.compare(
-            credentials.password as string,
-            user.password
-          );
-
-          console.log('Password valid:', isValid);
-          if (!isValid) {
-            console.log('Password comparison failed');
-            return null;
-          }
-
-          const result = {
-            id: user.id,
-            email: user.email,
-            name: user.displayName,
-            role: user.role,
-          };
-          
-          console.log('Authentication successful for:', result.email);
-          return result;
-        } catch (error) {
-          console.error('Auth error:', error);
-          return null;
-        }
-      },
-    }),
-  ],
+  providers,
   session: { strategy: 'jwt' },
   pages: {
     signIn: '/login',
