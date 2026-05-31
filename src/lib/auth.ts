@@ -35,7 +35,7 @@ const KakaoProvider = {
   },
 };
 
-const providers = [
+const providers: any[] = [
   Google({
     clientId: process.env.GOOGLE_CLIENT_ID!,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
