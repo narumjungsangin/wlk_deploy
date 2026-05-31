@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
+  // Database check API - v2
   try {
     // 데이터베이스 연결 테스트
     await prisma.$connect();
