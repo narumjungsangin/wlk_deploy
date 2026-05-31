@@ -55,7 +55,7 @@ export default async function Home() {
                 title={cat.label}
                 href={`/${cat.slug}`}
                 subCategories={cat.subCategories}
-                posts={mappedPosts.filter((p) => p.category === cat.slug).slice(0, 5)}
+                posts={mappedPosts.filter((p) => p.category === cat.slug || (cat.legacySlugs ?? []).includes(p.category)).slice(0, 5)}
               />
             ))}
           </div>

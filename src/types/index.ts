@@ -52,4 +52,5 @@ export interface CategoryMeta {
   description: string;
   subCategories?: { slug: string; label: string }[];
   tags?: { slug: string; label: string }[];
+  legacySlugs?: string[];
 }

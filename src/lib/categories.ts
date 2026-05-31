@@ -5,6 +5,7 @@ export const CATEGORIES: CategoryMeta[] = [
     slug: 'info',
     label: '정보나눔터',
     description: '지역 생활 정보를 자유롭게 나눠요',
+    legacySlugs: ['정보나눔터'],
     subCategories: [
       { slug: 'general', label: '일반' },
       { slug: 'living', label: '생활정보' },
@@ -38,6 +39,7 @@ export const CATEGORIES: CategoryMeta[] = [
     slug: 'jobs',
     label: 'Job & Work',
     description: '구인·구직 정보',
+    legacySlugs: ['구인구직'],
   },
   {
     slug: 'housing',
@@ -59,6 +61,7 @@ export const CATEGORIES: CategoryMeta[] = [
     slug: 'tutoring',
     label: '과외 / 튜터링',
     description: '과외 구합니다 · 과외 선생님 구합니다 · 학원 정보',
+    legacySlugs: ['과외'],
     subCategories: [
       { slug: 'find-tutor', label: '튜터 구합니다' },
       { slug: 'offer-tutor', label: '튜터 해드립니다' },
